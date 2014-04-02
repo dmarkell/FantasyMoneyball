@@ -1,6 +1,6 @@
 import bs4
 import json
-from datetime import datetime
+import datetime
 import urllib
 import urllib2
 
@@ -8,7 +8,7 @@ import urllib2
 BASE = "http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
 params = dict(leagueId=183180, view='stats', mode='bydate', filter=2,
     start=20140322, end=20141231)
-FILENAME = 'active_stats1.txt'
+
 
 class Stats:
     
@@ -16,6 +16,7 @@ class Stats:
         self.stats = {}
         TEAMS = [1, 2, 3, 4, 5,
                  6, 7, 8, 9, 11] 
+        self.FILENAME = 'active_stats.txt'
         for team in TEAMS:
             self.get_team(team)
     
@@ -31,40 +32,78 @@ class Stats:
         head_row = soup.find("tr", "tableSubHead")
         labels = head_row.findAll("td")
         labels = map(self.td_cont, labels)
-        self.labels = filter(None, labels)
+        self.labels = filter(None, labels)[1:]
         trs = soup.findAll("tr", "tableBody")
+        # Map list of tr objects to a list of (key, value) tuples
         days = map(self.get_day, trs)
-        days = filter(None, days)
-        self.stats[str(team)] = days
-    
+        # Filter out invalid rows
+        days = filter(lambda x: x[0] <> None, days)
+        # Assign team's stats to the stats dictionary
+        self.stats[str(team)] = dict(days)
+
+    def valid_row(self, tds):
+        """Checks tds array and returns True if row is valid, False if not"""
+
+        valid_row = True
+        if self.td_cont(tds[0]) == 'TOTALS':
+            valid_row = False
+        elif self.td_cont(tds[1]) == '--':
+            valid_row = False
+        elif self.td_cont(tds[10]) == '--':
+            valid_row = False
+
+        return valid_row
+
     def get_day(self, tr):
-        day = {}
+        """Returns dict of day's stats using labels"""
+
+        day_key = None
+        day_stats = {}
         tds = tr.findAll('td')
-        if self.td_cont(tds[0]) <> 'TOTALS' and self.td_cont(tds[1]) <> '--' and self.td_cont(tds[10]) <> '--':
+        if self.valid_row(tds):
             tds = map(self.td_cont, tds)
             tds = filter(None, tds)
             fmt = '%A, %B %d'
-            dt = datetime.strptime(
-            tds[0], fmt)
+            dt = datetime.datetime.strptime(tds[0], fmt)
             fmt = '%m-%d'
-            day['date'] = "2014-{}".format(
-            dt.strftime(fmt))
-            for ix, key in enumerate(
-            self.labels[1:]):
-                day[key] = tds[ix + 1]
-        return day
+            day_key = "2014-{}".format(dt.strftime(fmt))
+            tds = tds[1:]
+            for ix, label in enumerate(self.labels):
+                day_stats[label] = tds[ix]
 
-def save_stats(stats):
-    with open(FILENAME, 'w') as f:
-        data = json.dumps(stats.stats)
-        f.write(data)
+        return day_key, day_stats
+
+    def write_stats(self):
+        with open(self.FILENAME, 'w') as f:
+            data = json.dumps(self.stats)
+            f.write(data)
+
+    def __str__(self):
+        stats = self.stats
+        output = ""
+
+        for ix, (team, days) in enumerate(stats.items()):
+            sorted_stats = sorted(days.items(), reverse=True)
+            date, latest = sorted_stats[1]
+            size = len(latest)
+            fmt = "\t{:>5}"*size 
+            if ix == 0:
+
+                output += "{}\n".format(date)
+                output += "       "
+                output += fmt.format(*latest.keys()) + "\n"
+            output += "Team {:2}:".format(team)
+            output += fmt.format(*latest.values()) + "\n"            
+
+        return output
 
 #with open(FILENAME, 'r') as f:
 #    f.read()
 
 def main():
     stats = Stats()
-    print(stats.stats.keys(), stats.stats.values()[0])
+    stats.write_stats()
+    print(stats)
 
 if __name__ == "__main__":
     main()
