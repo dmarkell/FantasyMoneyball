@@ -69,18 +69,21 @@ class Lineup:
 def main():
     year = 2014
     output = "teamId,date,scoringPeriodId,slot,playerId,playerName\n"
+    with open("{}_lineups.csv".format(year), 'w') as f:
+        f.write(output)
     for team in TEAMS:
         scoring_period = 1
-        while True:
+        while scoring_period <= 12:
             lineup = Lineup(team, scoring_period, year=year)
             if lineup.error:
                 break
-            output += lineup.csv()
+            output = lineup.csv()
+            with open("{}_lineups.csv".format(year), 'a') as f:
+                f.write(output)
             scoring_period += 1
 
     
-    with open("{}_lineups.csv".format(year), 'w') as f:
-        f.write(output)
+    
 
 if __name__ == "__main__":
     main()
