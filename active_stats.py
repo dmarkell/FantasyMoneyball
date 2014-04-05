@@ -97,9 +97,6 @@ class Stats:
 
         return output
 
-#with open(FILENAME, 'r') as f:
-#    f.read()
-
 def main():
     stats = Stats()
     stats.write_stats()

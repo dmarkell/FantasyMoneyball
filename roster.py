@@ -82,15 +82,6 @@ def main():
                 f.write(output)
             scoring_period += 1
 
-    
-    
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
