@@ -1,4 +1,15 @@
 
+# Standings
+
+BASE = "http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
+
+leagueId=183180
+view='stats'
+mode='bydate'
+filter=2,
+start=20140322
+end=20141231
+
 # Roster
 BASE = "http://games.espn.go.com/flb/playertable/prebuilt/manageroster?""
 

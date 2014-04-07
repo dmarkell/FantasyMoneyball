@@ -1,4 +1,5 @@
 import bs4
+import csv
 import json
 import datetime
 import urllib
@@ -9,14 +10,15 @@ BASE = "http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
 params = dict(leagueId=183180, view='stats', mode='bydate', filter=2,
     start=20140322, end=20141231)
 
-
 class Stats:
     
     def __init__(self):
         self.stats = {}
         TEAMS = [1, 2, 3, 4, 5,
                  6, 7, 8, 9, 11] 
-        self.FILENAME = 'active_stats.txt'
+        self.FILEPATH = '../../../Public/baseball'
+        #self.FILEPATH = 'data'
+        self.FILENAME = 'active_stats'
         for team in TEAMS:
             self.get_team(team)
     
@@ -32,6 +34,12 @@ class Stats:
         head_row = soup.find("tr", "tableSubHead")
         labels = head_row.findAll("td")
         labels = map(self.td_cont, labels)
+        section_break = labels[2:].index(u'')
+        for ix, name in enumerate(labels[2:]):
+            if ix < section_break:
+                labels[ix + 2] = "b_{}".format(name)
+            elif ix > section_break:
+                labels[ix + 2] = "p_{}".format(name)
         self.labels = filter(None, labels)[1:]
         trs = soup.findAll("tr", "tableBody")
         # Map list of tr objects to a list of (key, value) tuples
@@ -39,7 +47,10 @@ class Stats:
         # Filter out invalid rows
         days = filter(lambda x: x[0] <> None, days)
         # Assign team's stats to the stats dictionary
-        self.stats[str(team)] = dict(days)
+        for date, stats in days:
+            entries = self.stats.get(date, {})
+            entries[str(team)] = stats
+            self.stats[date] = entries
 
     def valid_row(self, tds):
         """Checks tds array and returns True if row is valid, False if not"""
@@ -74,9 +85,29 @@ class Stats:
         return day_key, day_stats
 
     def write_stats(self):
-        with open(self.FILENAME, 'w') as f:
-            data = json.dumps(self.stats)
-            f.write(data)
+        json_path = "{}/{}.txt".format(self.FILEPATH, self.FILENAME)
+        csv_path = "{}/{}.csv".format(self.FILEPATH, self.FILENAME)
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data = dict(last_updated=timestamp, stats=self.stats)
+        output = json.dumps(data)
+        with open(json_path, 'w') as f:
+            f.write(output)
+
+        labels = self.stats.values()[0].values()[0].keys()
+        header = "date,teamId,{}".format(','.join(labels))
+        self.csv = []
+        for date, teams in self.stats.items():
+            for team, stats in teams.items():
+                values = stats.values()
+                values.insert(0, team)
+                values.insert(0, date)
+                self.csv.append(tuple(values))
+
+        self.csv = sorted(self.csv, reverse=True)
+        with open(csv_path, 'w') as f:
+            f.write(header + '\n') 
+            for entry in self.csv:
+                f.write(','.join(entry) + '\n')
 
     def __str__(self):
         stats = self.stats
@@ -100,7 +131,7 @@ class Stats:
 def main():
     stats = Stats()
     stats.write_stats()
-    print(stats)
+    
 
 if __name__ == "__main__":
     main()

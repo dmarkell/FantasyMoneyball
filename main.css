@@ -1,0 +1,115 @@
+body, html, h1, h2, h3, h4, h5, h6, p, table {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: verdana;
+    background-color: #ECF0F1;
+}
+
+.wrapper {
+    text-align: center;
+    margin: 20px auto 0;
+    width: 80%;
+}
+
+header {
+    background: linear-gradient(tomato, #ECF0F1);
+    padding: 10px;
+}
+
+header h1 {
+    display: inline-block;
+}
+
+header div {
+    display: inline-block;
+    float: right;
+}
+
+date {
+    font-size: 0.7em;
+    font-style: italic;
+    font-family: courier;
+}
+
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+td {
+    width: 50px;
+    text-align: center;
+}
+
+tbody th {
+    text-align: left;
+    padding: 5px 8px;
+}
+
+thead tr:first-child {
+    /*display: none;*/
+}
+
+thead tr:nth-child(2) th:nth-child(n+2) {
+    border-top: thin solid;
+    border-bottom: thin solid;
+}
+
+thead tr:nth-child(2) th:nth-child(n+2),
+thead tr:nth-child(3) th:nth-child(2),
+thead tr:nth-child(3) th:nth-child(7) {
+    border-left: thin solid;
+}
+
+tr {
+    background-color: #f8f8f2;
+}
+
+tr:nth-child(2n) {
+    background-color: #f2f2e8;
+}
+
+thead, th {
+    background-color: steelblue;
+    color: white;
+}
+
+button {
+    background-color: silver;
+    box-shadow: 1px 1px 1px black;
+    border: none;
+    border-radius: 3px;
+    font-size: 1em;
+    padding: 5px 8px;
+    -webkit-appearance: none;
+}
+
+button:hover {
+    color: white;
+    background: darkgrey;
+    cursor: pointer;
+}
+
+button:active {
+    outline: none;
+    box-shadow: none;
+    position: relative;
+    left: 2px;
+    top: 2px;
+}
+
+select {
+    border: thin solid steelblue;
+    font-size: 0.8em;
+    padding: 10px;
+}
+
+@media only screen and (min-width: 750px) {
+    .wrapper {
+        width: 600px;
+    }
+}
