@@ -1,7 +1,7 @@
 
 var refreshJSONData = function() {
-    //var ajaxUrl = "http://localhost:8000/active_stats.txt"
-    var ajaxUrl = "https://dl.dropboxusercontent.com/u/29149143/baseball/active_stats.txt"
+    var ajaxUrl = "http://localhost:8000/active_stats.txt"
+    //var ajaxUrl = "https://dl.dropboxusercontent.com/u/29149143/baseball/active_stats.txt"
     var xhr;
     xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -97,38 +97,45 @@ var recoverData = function() {
 };
 
 var sortTable = function(e) {
-    var child, sort_key, stat_keys_row, recovered, config;
+    var child, sort_key, stat_keys_row, recovered, config, class_name;
+    var opp_sort_dirs = { "asc": -1, "desc": 1 }
     recovered = recoverData();
     config = recovered[1];
-    var i = 0;
+    class_name = e.className;
+    console.log("e.className=" + class_name);
+    var sort_col = 0;
     stat_keys_row = e.parentNode.parentNode.nextSibling.firstChild;
     while ( (e = e.previousSibling) != null )
-        i++;
-    sort_key = stat_keys_row.getElementsByTagName("td")[i-1].innerHTML;
+        sort_col++;
+    sort_key = stat_keys_row.getElementsByTagName("td")[sort_col - 1].innerHTML;
     config['sort_key'] = sort_key;
-
-    config['sort_dir'] = sortDirLookup(sort_key);
-    
-    updateStatsTable(recovered[0], config);
+    config['sort_dir'] = class_name ? opp_sort_dirs[class_name.split(" ")[1]] : sortDirLookup(sort_key);
+    console.log("config in sortTable=");
+    console.dir(config);
+    updateStatsTable(recovered[0], config, sort_col);
 }
 
-var updateStatsTable = function(stats, config) {
-    var i, j, team, team_stats, tr, trs;
-
+var updateStatsTable = function(stats, config, sort_col) {
+    var i, j, team, team_stats, tr, trs, stat_keys_row, sort_td, class_name;
+    console.log("config in updateStatsTable=");
+    console.dir(config);
     var def_config = {
         'sort_key': 'b_R', 'sort_dir': 1,
         'stat_keys': ['b_R', 'b_HR', 'b_RBI', 'b_SBN',
             'b_OBP', 'p_K', 'p_QS', 'p_SV', 'p_ERA', 'p_WHIP']
     };
     config = typeof config != 'undefined' ? config : def_config;
+    console.log("config in updateStatsTable2=");
+    console.dir(config);
     for (key in def_config) {
-        if (!config.hasOwnProperty(key)) {
+        console.log(key, config[key])
+        if (!config[key]) {
             config[key] = def_config[key];
         };
     };
-
+    console.log("config in updateStatsTable3=");
+    console.dir(config);
     var stat_keys = config['stat_keys'];
-
     var num_batting = stat_keys.filter(function(s) {
         return s.split('_')[0] == 'b';
     }).length;
@@ -157,7 +164,15 @@ var updateStatsTable = function(stats, config) {
         tr += '<td>' + team_stats.join('</td><td>') + '</td>'
         trs.push(tr);
     };
-    table.innerHTML += '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>'
+    table.innerHTML += '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>';
+    if (sort_col) {
+        console.log(config['sort_dir'], (config['sort_dir'] == 1 ? 'asc' : 'desc'))
+        class_name = 'sort ' + (config['sort_dir'] == 1 ? 'asc' : 'desc');
+        console.log("add className=" + class_name)
+        stat_keys_row = table.querySelector("thead").getElementsByTagName("tr")[1];
+        sort_td = stat_keys_row.getElementsByTagName("th")[sort_col];
+        sort_td.className = class_name;
+    };
 };
 
 refreshJSONData();
