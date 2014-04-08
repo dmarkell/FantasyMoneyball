@@ -2,6 +2,7 @@ import bs4
 import csv
 import json
 import datetime
+import os
 import urllib
 import urllib2
 
@@ -15,8 +16,13 @@ class Stats:
     def __init__(self):
         self.stats = {}
         TEAMS = [1, 2, 3, 4, 5,
-                 6, 7, 8, 9, 11] 
-        self.FILEPATH = '../../../Public/baseball'
+                 6, 7, 8, 9, 11]
+        
+        if os.name == 'posix':
+            self.FILEPATH = '/Users/devinmarkell/Dropbox/Public/baseball'
+        else:
+            self.FILEPATH = 'C:\\Users\\dmarkell.BOC\\Dropbox\\Public\\baseball'
+            
         #self.FILEPATH = 'data'
         self.FILENAME = 'active_stats'
         for team in TEAMS:
@@ -84,7 +90,7 @@ class Stats:
 
         return day_key, day_stats
 
-    def write_stats(self):
+    def write_stats_json(self):
         json_path = "{}/{}.txt".format(self.FILEPATH, self.FILENAME)
         csv_path = "{}/{}.csv".format(self.FILEPATH, self.FILENAME)
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -93,6 +99,7 @@ class Stats:
         with open(json_path, 'w') as f:
             f.write(output)
 
+    def write_stats_csv(self):
         labels = self.stats.values()[0].values()[0].keys()
         header = "date,teamId,{}".format(','.join(labels))
         self.csv = []
@@ -109,28 +116,9 @@ class Stats:
             for entry in self.csv:
                 f.write(','.join(entry) + '\n')
 
-    def __str__(self):
-        stats = self.stats
-        output = ""
-
-        for ix, (team, days) in enumerate(stats.items()):
-            sorted_stats = sorted(days.items(), reverse=True)
-            date, latest = sorted_stats[1]
-            size = len(latest)
-            fmt = "\t{:>5}"*size 
-            if ix == 0:
-
-                output += "{}\n".format(date)
-                output += "       "
-                output += fmt.format(*latest.keys()) + "\n"
-            output += "Team {:2}:".format(team)
-            output += fmt.format(*latest.values()) + "\n"            
-
-        return output
-
 def main():
     stats = Stats()
-    stats.write_stats()
+    stats.write_stats_json()
     
 
 if __name__ == "__main__":
