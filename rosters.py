@@ -5,8 +5,9 @@ from pprint import pprint
 import urllib
 import urllib2
 
-TEAMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11]
+from league_info import *
 
+#TEAMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11]
 
 class Lineup:
 
@@ -19,7 +20,7 @@ class Lineup:
 
     def get_lineup(self):
         BASE = "http://games.espn.go.com/flb/boxscorequick?"
-        params = dict(leagueId=183180, view='scoringperiod', 
+        params = dict(leagueId=LEAGUE_ID, view='scoringperiod', 
             version='quick')
         params['seasonId'] = self.year
         params['teamId'] = self.team
@@ -82,6 +83,8 @@ def main():
                 f.write(output)
             scoring_period += 1
 
+for team in TEAMS:
+    print team
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

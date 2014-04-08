@@ -3,3 +3,4 @@
 cron/*
 tests/*
 data/*
+league_info.py

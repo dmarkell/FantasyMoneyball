@@ -6,6 +6,8 @@ import os
 import urllib
 import urllib2
 
+from league_info import *
+
 
 BASE = "http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
 params = dict(leagueId=183180, view='stats', mode='bydate', filter=2,
