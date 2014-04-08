@@ -1,36 +1,70 @@
+# Fantasy Moneyball
 
-# Standings
+## What?
 
-BASE = "http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
+An ongoing project consisting of scripts and web-app for viewing and analyzing our fantasy baseball league hosted on ESPN Fantasy Baseball
 
-leagueId=183180
-view='stats'
-mode='bydate'
-filter=2,
-start=20140322
-end=20141231
+## Why? 
 
-# Roster
-BASE = "http://games.espn.go.com/flb/playertable/prebuilt/manageroster?""
+ESPN Fantasy & Games provides effective tools for draft prep, live drafts and league and roster management. However, we saw a distance between the detail of the provided team stats relative to the volume of available baseball Sabermetrics.
 
-leagueId=183180
-teamId=3
-seasonId=2014
-scoringPeriodId=9
-view=stats
-managingIr=false
-droppingPlayers=false
-asLM=false
+## ESPN API
 
-# Not required:
-context=clubhouse
+Below is some documentation on  of the JSON API endpoints used by ESPN Fantasy Sports to populate their own client views through the fantasy baseball portal. Your experience may vary, so please share any comments!
 
-# Condensed roster
+### Daily Stats
+
+BASE URL:
+
+ - http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
+
+REQUIRED PARAMETERS:
+
+ - INVARIANT:
+   + view='stats'
+   + mode='bydate'
+
+ - INVARIANT FOR LEAGUE:
+   + leagueId=[INTEGER]
+
+ - VARIABLE:
+   + filter=[1=batting, 2=pitching]
+   + teamId=[INTEGER]
+   + start=[YYYYMMDD] (20140322 for 2014)
+   + end=[YYYYMMDD] (20141231 for 2014)
+
+### Daily Roster
+
+BASE URL:
+
+ - http://games.espn.go.com/flb/playertable/prebuilt/manageroster?
+
+REQUIRED PARAMS:
+
+ - INVARIANT:
+   + view=stats
+   + managingIr=false
+   + droppingPlayers=false
+   + asLM=false
+ - INVARIANT FOR LEAGUE:
+   + leagueId=[INTEGER]
+ - VARIABLE:
+   + teamId=[INTEGER]
+   + scoringPeriodId=[INTEGER 1-# games in season] (191 for 2014)
+   + seasonId=[YYYY]
+
+### Condensed roster
+
 BASE = "http://games.espn.go.com/flb/boxscorequick?"
 
-leagueId=183180
-teamId=3
-scoringPeriodId=12
-seasonId=2013
-view=scoringperiod
-version=quick
+- INVARIANT:
+   + view=scoringperiod
+   + version=quick
+ - INVARIANT FOR LEAGUE:
+   + leagueId=[INTEGER]
+ - VARIABLE:
+   + teamId=[INTEGER]
+   + scoringPeriodId=[INTEGER 1-# games in season] (191 for 2014)
+   + seasonId=[YYYY]
+
+
