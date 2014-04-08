@@ -7,7 +7,7 @@
 </head>
 <body>
     <header>
-        <h1>Thick Sticks Active Stats</h1>
+        <h1 onclick="console.log(this.innerHTML)">Thick Sticks Active Stats</h1>
         <div>
             Last updated: <date id="timestamp"></date>
             <button onclick="refreshJSONData()">Refresh</button>
@@ -19,75 +19,7 @@
         <select id="date" onChange="refreshJSONData()">
         </select>
 
-        <table id="main">
-            <thead>
-                <tr id="stat_type">
-                    <th></th>
-                    <th>b_</th><th>b_</th><th>b_</th><th>b_</th><th>b_</th>
-                    <th>p_</th><th>p_</th><th>p_</th><th>p_</th><th>p_</th>
-                </tr>
-                <tr id="stat_type">
-                    <th></th>
-                    <th colspan="5">Batting Stats</th>
-                    <th colspan="5">Pitching Stats</th>
-                </tr>
-                <tr id="stat_name">
-                    <th>Team</th>
-                    <th>R</th><th>HR</th><th>RBI</th><th>SBN</th><th>OBP</th>
-                    <th>K</th><th>QS</th><th>SV</th><th>ERA</th><th>WHIP</th>
-                </tr>
-            </thead>
-            <tr>
-                <th>B. Barrett</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Z. Barrett</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Markell</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Bevins</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Hallau</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Fumarolo</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Gilpin</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Lewis</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Sharma</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <th>Patterson</th>
-                <td></td><td></td><td></td><td></td><td></td>
-                <td></td><td></td><td></td><td></td><td></td>
-            </tr>
-        </table>
+        <table id="main"></table>
     </div>
 
 <!--<script type="text/javascript" src="https://dl.dropboxusercontent.com/u/29149143/active_stats/main.js"></script>-->
