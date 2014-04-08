@@ -10,15 +10,13 @@ from league_info import *
 
 
 BASE = "http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
-params = dict(leagueId=183180, view='stats', mode='bydate', filter=2,
+params = dict(leagueId=LEAGUE_ID, view='stats', mode='bydate', filter=2,
     start=20140322, end=20141231)
 
 class Stats:
     
     def __init__(self):
         self.stats = {}
-        TEAMS = [1, 2, 3, 4, 5,
-                 6, 7, 8, 9, 11]
         
         if os.name == 'posix':
             self.FILEPATH = '/Users/devinmarkell/Dropbox/Public/baseball'

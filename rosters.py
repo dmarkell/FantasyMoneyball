@@ -7,8 +7,6 @@ import urllib2
 
 from league_info import *
 
-#TEAMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11]
-
 class Lineup:
 
     def __init__(self, team, scoring_period, year=2013):
@@ -82,9 +80,6 @@ def main():
             with open("{}_lineups.csv".format(year), 'a') as f:
                 f.write(output)
             scoring_period += 1
-
-for team in TEAMS:
-    print team
 
 #if __name__ == "__main__":
 #    main()
