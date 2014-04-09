@@ -1,3 +1,5 @@
+
+
 body, html, h1, h2, h3, h4, h5, h6, p, table {
     padding: 0;
     margin: 0;
@@ -11,7 +13,10 @@ body {
 .wrapper {
     text-align: center;
     margin: 0 auto;
-    width: 80%;
+}
+
+.wrapper nav div {
+    display: inline-block;
 }
 
 header {
@@ -19,73 +24,117 @@ header {
     padding: 10px;
 }
 
+
 header h1 {
     display: inline-block;
 }
 
-header div {
-    display: inline-block;
-    float: right;
+footer {
+    background-color: lightgray;
+    text-align: right;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    opacity: 0.8;
+}
+
+footer div {
+    font-size: 0.7em;
+    font-style: italic;
 }
 
 date {
-    font-size: 0.7em;
-    font-style: italic;
-    font-family: courier;
+
 }
 
-table {
-    margin: 20px auto;
+/* Table */
+table {   
     border-collapse: collapse;
     border-spacing: 0;
 }
 
 td {
-    width: 50px;
     text-align: center;
 }
 
-tbody th {
+/* Main stats table */ 
+
+table#main {
+    margin: 20px auto;
+}
+
+#main td {
+    width: 50px;
+    
+}
+
+#main tbody th {
     text-align: left;
     padding: 5px 8px;
 }
 
-thead tr:first-child {
-    /*display: none;*/
+/* Sortable head labels */
+#main thead tr:nth-child(2) th:nth-child(n+2) {
+    cursor: pointer;
 }
 
-thead tr:nth-child(2) th:nth-child(n+3) {
-    border-top: thin solid;
-    border-bottom: thin solid;
+.sort {
+    background-color: lightsteelblue;
+    color: black;
 }
 
-thead tr:nth-child(2) th:nth-child(n+3),
-thead tr:nth-child(3) th:nth-child(3),
-thead tr:nth-child(3) th:nth-child(8) {
-    border-left: thin solid;
+.desc:after {
+    content: "\25BD";
 }
 
-tr {
+.asc:after {
+    content: "\25B3";
+}
+
+/* ---- */
+
+/* Hide teamId col and stat_name row */
+#main thead th:nth-child(2),
+#main tbody td:first-of-type,
+#main tbody tr:first-child {
+    display: none;
+}
+
+/* Table header borders */
+#main thead tr:nth-child(2) th:nth-child(n+3) {
+    border-top: thin solid white;
+}
+
+#main thead tr:nth-child(2) th:nth-child(n+3),
+#main thead tr:nth-child(2) th:nth-child(3),
+#main thead tr:first-child th:nth-child(n+3) {
+    border-left: thin solid white;
+}
+
+#main tr {
     background-color: #f8f8f2;
 }
 
-tr:nth-child(2n) {
+#main tr:nth-child(2n) {
     background-color: #f2f2e8;
 }
 
-thead, th {
+#main thead, th {
     background-color: steelblue;
     color: white;
 }
 
 button {
-    background-color: silver;
+    background-color: #f8f8f2;
     box-shadow: 1px 1px 1px black;
     border: none;
     border-radius: 3px;
     font-size: 1em;
     padding: 5px 8px;
     -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
 }
 
 button:hover {
@@ -102,14 +151,31 @@ button:active {
     top: 2px;
 }
 
+button:focus {
+    outline: 0;
+}
+
 select {
     border: thin solid steelblue;
     font-size: 0.8em;
     padding: 10px;
 }
 
-@media only screen and (min-width: 750px) {
+@media only screen and (min-width: 1000px) {
     .wrapper {
-        width: 600px;
+        width: 800px;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    #main tbody th span {
+        display: none;
+    }
+
+}
+
+@media only screen and (max-width: 480px) {
+    .wrapper nav div {
+        display: block;
     }
 }

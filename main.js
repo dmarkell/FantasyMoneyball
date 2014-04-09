@@ -1,7 +1,7 @@
 
 var refreshJSONData = function() {
-    var ajaxUrl = "http://localhost:8000/active_stats.txt"
-    //var ajaxUrl = "https://dl.dropboxusercontent.com/u/29149143/baseball/active_stats.txt"
+    //var ajaxUrl = "http://localhost:8000/active_stats.txt"
+    var ajaxUrl = "https://dl.dropboxusercontent.com/u/29149143/baseball/active_stats.txt"
     var xhr;
     xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -14,10 +14,18 @@ var refreshJSONData = function() {
     xhr.send();
 }
 
+var prepName = function(team_name) {
+    var pieces, last, output;
+    pieces = team_name.split(" ");
+    last = pieces[1];
+    output = pieces[0][0] + '<span>.&nbsp;</span>' + last[0] + '<span>' + last.slice(1) + '</span>';
+    return output;
+}
+
 var teamNameLookup = function(teamId) {
-    return { "1": "B. Barrett", "2": "Z. Barrett", "3": "Markell",
-        "4": "Bevins", "5": "Hallau", "6": "Fumarolo", "7": "Gilpin",
-        "8": "Lewis", "9": "Sharma", "11": "Patterson" }[teamId];
+    return { "1": "B. Barrett", "2": "Z. Barrett", "3": "D. Markell",
+        "4": "P. Bevins", "5": "D. Hallau", "6": "A. Fumarolo", "7": "L. Gilpin",
+        "8": "S. Lewis", "9": "R. Sharma", "11": "D. Patterson" }[teamId];
 };
 
 var sortDirLookup = function(sort_key) {
@@ -25,6 +33,21 @@ var sortDirLookup = function(sort_key) {
             "p_BB": 1, "p_ER": 1, "b_GP": -1, "p_IP": -1, "p_ERA": 1,
             "b_SBN": -1, "b_RBI": -1, "b_AB": -1, "b_R": -1, "b_OBP": -1,
             "b_BB": -1, "b_HR": -1}[sort_key];
+}
+
+var statTypeLookup = function(stat_type) {
+    var statTypeLookup = {
+        //TODO: add optional extended stats
+        //"p": ["p_H", "p_QS", "p_K", "p_H", "p_WHIP", "p_SV", "p_BB", "p_ER", "p_IP", "p_ERA"],
+        //"b": ["b_GP",  "b_SBN", "b_RBI", "b_AB", "b_R", "b_OBP", "b_BB", "b_HR"]
+        "p": ["p_IP", "p_QS", "p_SV", "p_ERA", "p_WHIP",  "p_K"],
+        "b": ["b_GP", "b_R", "b_HR", "b_RBI", "b_SBN", "b_OBP"]
+    };
+    if (stat_type == 'a') {
+        return statTypeLookup.b.concat(statTypeLookup.p)
+    } else {
+        return statTypeLookup[stat_type]
+    }
 }
 
 var updatePage = function(data) {
@@ -97,56 +120,54 @@ var recoverData = function() {
 };
 
 var sortTable = function(e) {
-    var child, sort_key, stat_keys_row, recovered, config, class_name;
+    var child, sort_key, stat_keys_row, recovered, config, class_name, sort_col;
     var opp_sort_dirs = { "asc": -1, "desc": 1 }
     recovered = recoverData();
     config = recovered[1];
     class_name = e.className;
-    console.log("e.className=" + class_name);
-    var sort_col = 0;
+    sort_col = 0;
     stat_keys_row = e.parentNode.parentNode.nextSibling.firstChild;
     while ( (e = e.previousSibling) != null )
         sort_col++;
     sort_key = stat_keys_row.getElementsByTagName("td")[sort_col - 1].innerHTML;
     config['sort_key'] = sort_key;
     config['sort_dir'] = class_name ? opp_sort_dirs[class_name.split(" ")[1]] : sortDirLookup(sort_key);
-    console.log("config in sortTable=");
-    console.dir(config);
     updateStatsTable(recovered[0], config, sort_col);
 }
 
 var updateStatsTable = function(stats, config, sort_col) {
-    var i, j, team, team_stats, tr, trs, stat_keys_row, sort_td, class_name;
-    console.log("config in updateStatsTable=");
-    console.dir(config);
+    var i, j, team, team_stats, tr, trs, stat_keys_row, sort_td, class_name,
+        num_b, num_p, table, thead, stat_labels, theads, teamId;
+
+    var stat_type = document.getElementById("stat-type").value;
+
     var def_config = {
-        'sort_key': 'b_R', 'sort_dir': 1,
-        'stat_keys': ['b_R', 'b_HR', 'b_RBI', 'b_SBN',
-            'b_OBP', 'p_K', 'p_QS', 'p_SV', 'p_ERA', 'p_WHIP']
+        'sort_key': 'b_OBP', 'sort_dir': -1,
+        'stat_keys': statTypeLookup(stat_type)
+        //'stat_keys': ['b_R', 'b_HR', 'b_RBI', 'b_SBN', 'b_OBP', 'p_K', 'p_QS', 'p_SV', 'p_ERA', 'p_WHIP']
     };
-    config = typeof config != 'undefined' ? config : def_config;
-    console.log("config in updateStatsTable2=");
-    console.dir(config);
+    var config = typeof config != 'undefined' ? config : def_config;
+
+
     for (key in def_config) {
-        console.log(key, config[key])
         if (!config[key]) {
             config[key] = def_config[key];
         };
     };
-    console.log("config in updateStatsTable3=");
-    console.dir(config);
-    var stat_keys = config['stat_keys'];
-    var num_batting = stat_keys.filter(function(s) {
+
+    stat_keys = config['stat_keys'];
+    num_b = stat_keys.filter(function(s) {
         return s.split('_')[0] == 'b';
     }).length;
-    var num_pitching = stat_keys.length - num_batting;
+    num_p = stat_keys.length - num_b;
 
-    var stat_labels = stat_keys.map(function(s) { return s.split('_')[1] });
-    var teams = sortTeams(stats, config);
-    var table = document.getElementById("main");
-    var theads = [];
-    var thead = '<th></th><th></th><th colspan="' + num_batting + '">Batting</th>'
-    thead += '<th colspan="' + num_pitching + '">Pitching</th>'
+    stat_labels = stat_keys.map(function(s) { return s.split('_')[1] });
+    teams = sortTeams(stats, config);
+    table = document.getElementById("main");
+    theads = [];
+    thead = '<th></th><th></th>'
+    thead += (num_b > 0 ? '<th colspan="' + num_b + '">Batting</th>' : '');
+    thead += (num_p > 0 ? '<th colspan="' + num_p + '">Pitching</th>' : '');
     theads.push(thead)
     thead = '<th></th><th></th><th onclick="sortTable(this)">'
     thead += stat_labels.join('</th><th onclick="sortTable(this)">') + '</th>'
@@ -154,10 +175,10 @@ var updateStatsTable = function(stats, config, sort_col) {
     table.innerHTML = '<thead><tr>' + theads.join('</tr><tr>') + '</tr></thead>'
     trs = ['<th></th><td></td><td>' + stat_keys.join('</td><td>') + '</td>'];
     for (i = 0; i < teams.length; i++) {
-        var teamId = teams[i];
+        teamId = teams[i];
         team = stats[teamId];
         team_stats = [];
-        tr = '<th>' + teamNameLookup(teams[i]) + '</th><td>' + teamId + '</td>';
+        tr = '<th>' + prepName(teamNameLookup(teams[i])) + '</th><td>' + teamId + '</td>';
         for (j = 0; j < stat_keys.length; j++) {
             team_stats.push(team[stat_keys[j]]);
         };
@@ -165,10 +186,9 @@ var updateStatsTable = function(stats, config, sort_col) {
         trs.push(tr);
     };
     table.innerHTML += '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>';
+    sort_col = sort_col || 7;
     if (sort_col) {
-        console.log(config['sort_dir'], (config['sort_dir'] == 1 ? 'asc' : 'desc'))
         class_name = 'sort ' + (config['sort_dir'] == 1 ? 'asc' : 'desc');
-        console.log("add className=" + class_name)
         stat_keys_row = table.querySelector("thead").getElementsByTagName("tr")[1];
         sort_td = stat_keys_row.getElementsByTagName("th")[sort_col];
         sort_td.className = class_name;

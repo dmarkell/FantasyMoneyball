@@ -8,20 +8,33 @@
 <body>
     <header>
         <h1 onclick="console.log(this.innerHTML)">League Dashboard</h1>
-        <div>
-            Last updated: <date id="timestamp"></date>
-            <button onclick="refreshJSONData()">Refresh</button>
-        </div>
+
 
     </header>
     <div class='wrapper'>
-        Date:
-        <select id="date" onChange="refreshJSONData()">
-        </select>
-
+        <nav>
+            <div>
+                Date:
+                <select id="date" onChange="refreshJSONData()"></select>
+            </div>
+            <div>
+                Stats:
+                <select id="stat-type" onChange="refreshJSONData()">
+                    <option selected value="p">Pitching</option>
+                    <option selected value="b">Batting</option>
+                    <option selected value="a">Pitching & Batting</option>
+                </select>
+            </div>
+        </nav>
         <table id="main"></table>
     </div>
 
+<footer>
+    <div>
+        Last update: <date id="timestamp"></date>
+        <button onclick="refreshJSONData()">Refresh</button>
+    </div>
+</footer>
 <!--<script type="text/javascript" src="https://dl.dropboxusercontent.com/u/29149143/active_stats/main.js"></script>-->
 <script type="text/javascript" src="main.js"></script>
 </body>
