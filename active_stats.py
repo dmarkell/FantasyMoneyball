@@ -22,8 +22,7 @@ class Stats:
             self.FILEPATH = '/Users/devinmarkell/Dropbox/Public/baseball'
         else:
             self.FILEPATH = 'C:\\Users\\dmarkell.BOC\\Dropbox\\Public\\baseball'
-            
-        #self.FILEPATH = 'data'
+
         self.FILENAME = 'active_stats'
         for team in TEAMS:
             self.get_team(team)
