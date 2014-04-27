@@ -1,12 +1,111 @@
 
+var aggregate = function(data, full_only) {
+    var team, date, day, t, d, total, stat_name, team_total,
+        ob_adj;  
+    
+    var last = data['last_updated'].split(" ")[0];
+        stats = data.stats;
+
+    var dates = [],
+        teams = [],
+        stat_names = [],
+        totals = {};
+
+    var getOBAdj = function(day) {
+        var numer = day.b_OBP * day.b_AB - day.b_BB * (1 - day.b_OBP) - day.b_H;
+        var denom = 1 - day.b_OBP;
+        return numer / denom;
+    }
+
+    var imputed_stats = {
+        'p_WHIP': function(stats) {
+            var wh = stats.p_H + stats.p_BB;
+            var ip = stats.p_IP;
+            if (ip === 0) {
+                return wh === 0 ? "NA" : "INF"
+            };
+            return parseFloat((wh / ip).toFixed(2));
+        },
+        'p_K/BB': function(stats) {
+            if (stats.p_BB === 0) {
+                return "NA"
+            };
+            return parseFloat((stats.p_K / stats.p_BB).toFixed(2));
+        },
+        'p_K/9': function(stats) {
+            if (stats.p_IP === 0) {
+                return "NA";
+            }
+            return parseFloat((9 * stats.p_K / stats.p_IP).toFixed(1));
+        },
+        // OBP = (H + BB + other^) / (AB + BB + other^);
+        // OBP * (AB + BB) + OBP * other^ = H + BB + other^;
+        // OBP*AB + OBP*BB - BB - H = other^ * (1 - OBP);
+        // OBP*AB - BB*(1 - OBP) - H = other^ * (1 - OBP);
+        // other^ = (OBP*AB - BB*(1 - OBP) - H) / (1 - OBP);
+        'b_OBP': function(stats) {
+            var numer = stats.b_H + stats.b_BB + stats.ob_adj;
+            var denom = stats.b_AB + stats.b_BB + stats.ob_adj;
+            return parseFloat((numer / denom).toFixed(3));
+        },
+        'p_ERA': function(stats) {
+            var er = stats.p_ER;
+            var ip = stats.p_IP;
+            if (ip === 0) {
+                return er === 0 ? "NA" : "INF"
+            }
+            return parseFloat((er / ip * 9).toFixed(2));
+        }
+    };
+
+    for (date in stats) {
+        if (!full_only || date != last) {
+            dates.push(date);
+        }
+    };
+    dates = dates.sort(function(a, b) { return a < b ? 1: -1 });
+    for (team in stats[dates[0]]) {
+        teams.push(team);
+    };
+    for (stat_name in stats[dates[0]][team[0]]) {
+        if (!imputed_stats[stat_name]) {
+            stat_names.push(stat_name);
+        };
+    };
+    for (t = 0; t < teams.length; t++) {
+        team = teams[t];
+        team_total = {};
+        for (d = 0; d < dates.length; d++) {
+            date = dates[d];
+            day = stats[date][team];
+            for (s = 0; s < stat_names.length; s++) {
+                stat_name = stat_names[s];
+                total = team_total[stat_name] || 0;
+                total += parseFloat(day[stat_name]);
+                team_total[stat_name] = total;
+            };
+            ob_adj = team_total.ob_adj || 0;
+            ob_adj += getOBAdj(day);
+            team_total.ob_adj = ob_adj;
+        };
+        for (stat_name in imputed_stats) {
+            team_total[stat_name] = imputed_stats[stat_name](team_total);
+        };
+        team_total.p_IP = parseFloat(team_total.p_IP.toFixed(1));
+        totals[team] = team_total;
+    };
+    console.table(totals);
+    return totals;
+};
+
 var refreshJSONData = function() {
-    //var ajaxUrl = "http://localhost:8000/active_stats.txt"
+    var ajaxUrl = "http://localhost:8000/active_stats.txt";
     var ajaxUrl = "https://dl.dropboxusercontent.com/u/29149143/baseball/active_stats.txt"
     var xhr;
     xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4 && xhr.status==200) {
-            var data = JSON.parse(xhr.responseText);
+            data = JSON.parse(xhr.responseText); // GLOBAL
             updatePage(data);
         }
     }
@@ -52,7 +151,7 @@ var statTypeLookup = function(stat_type) {
 
 var updatePage = function(data) {
 
-    var stats, day, choice, date_options,
+    var stats, day, data, date_options,
         date_selector, types, names, timestamp,
         config;
     
@@ -64,19 +163,22 @@ var updatePage = function(data) {
 
     for (day in stats) { dates.push(day); };
     dates.sort(function(a,b) { return a > b ? -1 : 1 });
-    choice = dateSelector.value === '' ? dates[0] : dateSelector.value;
-    date_options = '';
+    if (!dateSelector.value || dateSelector.value == 0) {
+        stats = aggregate(data);
+    } else {
+        stats = stats[dateSelector.value]
+    };
+    date_options = '<option value=0>Full Season</option>';
     for (var i = 0; i < dates.length; i++) {
         day = dates[i];
-        if (day == choice) {
+        if (day == dateSelector.value) {
             date_options += '<option selected value="' + day + '">' + day + '</option>';    
         } else {
             date_options += '<option value="' + day + '">' + day + '</option>';
         }
     };
-    
     dateSelector.innerHTML = date_options;
-    updateStatsTable(stats[choice]);
+    updateStatsTable(stats);
 };
 
 var sortTeams = function(stats, config) {
@@ -143,7 +245,8 @@ var updateStatsTable = function(stats, config, sort_col) {
 
     var def_config = {
         'sort_key': 'b_OBP', 'sort_dir': -1,
-        'stat_keys': statTypeLookup(stat_type)
+        'stat_keys': statTypeLookup(stat_type),
+
         //'stat_keys': ['b_R', 'b_HR', 'b_RBI', 'b_SBN', 'b_OBP', 'p_K', 'p_QS', 'p_SV', 'p_ERA', 'p_WHIP']
     };
     var config = typeof config != 'undefined' ? config : def_config;

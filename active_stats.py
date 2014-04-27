@@ -8,7 +8,6 @@ import urllib2
 
 from league_info import *
 
-
 BASE = "http://games.espn.go.com/flb/playertable/prebuilt/activestats?"
 params = dict(leagueId=LEAGUE_ID, view='stats', mode='bydate', filter=2,
     start=20140322, end=20141231)
@@ -91,7 +90,6 @@ class Stats:
 
     def write_stats_json(self):
         json_path = "{}/{}.txt".format(self.FILEPATH, self.FILENAME)
-        csv_path = "{}/{}.csv".format(self.FILEPATH, self.FILENAME)
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = dict(last_updated=timestamp, stats=self.stats)
         output = json.dumps(data)
@@ -99,6 +97,7 @@ class Stats:
             f.write(output)
 
     def write_stats_csv(self):
+        csv_path = "data/{}.csv".format(self.FILENAME)
         labels = self.stats.values()[0].values()[0].keys()
         header = "date,teamId,{}".format(','.join(labels))
         self.csv = []
@@ -118,6 +117,8 @@ class Stats:
 def main():
     stats = Stats()
     stats.write_stats_json()
+    stats.write_stats_csv()
+    
     
 
 if __name__ == "__main__":
