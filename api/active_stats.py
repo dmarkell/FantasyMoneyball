@@ -88,11 +88,17 @@ class Stats:
 
         return day_key, day_stats
 
-    def write_stats_json(self):
-        json_path = "{}/{}.txt".format(self.FILEPATH, self.FILENAME)
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    def jsonify(self):
+        server_time = datetime.datetime.now()
+        et = server_time + datetime.timedelta(hours=-4)
+        timestamp = et.strftime("%Y-%m-%d %H:%M:%S")
         data = dict(last_updated=timestamp, stats=self.stats)
         output = json.dumps(data)
+        return output
+
+    def write_stats_json(self):
+        json_path = "{}/{}.txt".format(self.FILEPATH, self.FILENAME)
+        output = self.jsonify()
         with open(json_path, 'w') as f:
             f.write(output)
 
@@ -118,8 +124,6 @@ def main():
     stats = Stats()
     stats.write_stats_json()
     stats.write_stats_csv()
-    
-    
 
 if __name__ == "__main__":
     main()

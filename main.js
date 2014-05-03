@@ -101,6 +101,7 @@ var aggregate = function(data, full_only) {
 var refreshJSONData = function() {
     var ajaxUrl = "http://localhost:8000/active_stats.txt";
     var ajaxUrl = "https://dl.dropboxusercontent.com/u/29149143/baseball/active_stats.txt"
+    var ajaxUrl = "http://fantasy-moneyball.appspot.com/"
     var xhr;
     xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
